@@ -1,0 +1,14 @@
+{
+  "hello": "Merhaba",
+  "cannot_be_empty": "Bu alan boş olamaz!",
+  "dont_have_an_account": "Hesabınız yok mu?",
+  "email": "E-posta",
+  "have_an_account": "Hesabın var mı?",
+  "loading": "Yükleniyor...",
+  "login": "Giriş Yap",
+  "loggingin": "Giriş yapılıyor...",
+  "invalid_email_address": "Geçersiz e-posta adresi",
+  "name_lastname": "Ad Soyad",
+  "password": "Şifre",
+  "register": "Hesap Oluştur"
+}

@@ -1,0 +1,14 @@
+{
+  "hello": "Hello",
+  "cannot_be_empty": "Cannot be empty!",
+  "dont_have_an_account": "Don't have an account?",
+  "email": "E-mail",
+  "have_an_account": "Have an account?",
+  "loading": "Loading...",
+  "login": "Sign in",
+  "loggingin": "processing...",
+  "invalid_email_address": "Invalid e-mail address",
+  "name_lastname": "Name & Lastname",
+  "password": "Password",
+  "register": "Sign up"
+}
