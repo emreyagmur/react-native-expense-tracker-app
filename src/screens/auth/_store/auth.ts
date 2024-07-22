@@ -229,7 +229,7 @@ export function* saga() {
       const response = yield axios.post(`${BASE_URL}/login`, {email, password});
 
       if (response === undefined) {
-        yield put(authActions.setPhase('error', 'API Error!!!'));
+        yield put(authActions.setPhase('error', 'api_error'));
         return;
       } else if (response.data.error) {
         yield put(authActions.setPhase('error', response.data.error));
@@ -256,7 +256,7 @@ export function* saga() {
       });
 
       if (response === undefined) {
-        yield put(authActions.setPhase('error', 'API Error!!!'));
+        yield put(authActions.setPhase('error', 'api_error'));
         return;
       } else if (response.data.name) {
         yield put(authActions.setPhase('error', response.data.name));
@@ -286,7 +286,7 @@ export function* saga() {
       const response = yield axios.post(`${BASE_URL}/delete-user/${user.id}`);
 
       if (response.status !== 200) {
-        yield put(authActions.setPhase('user-deleting-error', 'API Error!!!'));
+        yield put(authActions.setPhase('user-deleting-error', 'api_error'));
         return;
       } else if (response.data.error) {
         yield put(
@@ -315,7 +315,7 @@ export function* saga() {
 
       if (response.data.error) {
         yield put(
-          authActions.setPhase('user-updating-password-error', 'API Error!!!'),
+          authActions.setPhase('user-updating-password-error', 'api_error'),
         );
         return;
       } else {
@@ -341,9 +341,7 @@ export function* saga() {
       );
 
       if (response === undefined) {
-        yield put(
-          authActions.setPhase('currency-updating-error', 'API Error!!!'),
-        );
+        yield put(authActions.setPhase('currency-updating-error', 'api_error'));
         return;
       } else if (response.data.error) {
         yield put(
@@ -374,7 +372,7 @@ export function* saga() {
       );
 
       if (response === undefined) {
-        yield put(authActions.setPhase('user-updating-error', 'API Error!!!'));
+        yield put(authActions.setPhase('user-updating-error', 'api_error'));
         return;
       } else if (response.data.error) {
         yield put(

@@ -1,4 +1,5 @@
 {
+  "api_error": "Bir hata oluştu daha sonra tekrar deneyin",
   "hello": "Merhaba",
   "cannot_be_empty": "Bu alan boş olamaz!",
   "dont_have_an_account": "Hesabınız yok mu?",
@@ -9,6 +10,7 @@
   "loggingin": "Giriş yapılıyor...",
   "invalid_email_address": "Geçersiz e-posta adresi",
   "name_lastname": "Ad Soyad",
+  "new_transaction": "Yeni İşlem",
   "password": "Şifre",
   "register": "Hesap Oluştur"
 }

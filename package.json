@@ -22,6 +22,7 @@
     "@types/redux-logger": "^3.0.13",
     "axios": "^1.7.2",
     "i18n-js": "^4.4.3",
+    "immer": "^10.1.1",
     "lucide-react-native": "^0.412.0",
     "moment": "^2.30.1",
     "object-path": "^0.11.8",

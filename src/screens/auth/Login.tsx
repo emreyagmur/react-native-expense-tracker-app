@@ -61,6 +61,7 @@ const Login = () => {
         return false;
       }
 
+      console.log(loginError);
       dispatch(authActions.login(emailText, passwordText));
     } else {
       if (emailText == '') {
@@ -83,7 +84,7 @@ const Login = () => {
           padding: 10,
           justifyContent: 'center',
         }}>
-        <View style={{marginBottom: 40, gap: 10}}>
+        <View style={{marginBottom: 30, gap: 10}}>
           <View style={{marginBottom: 15, gap: 10}}>
             <TextInput
               theme={{roundness: 10}}
@@ -155,6 +156,20 @@ const Login = () => {
             )}
           </View>
         </View>
+
+        {loginError === 'api_error' && (
+          <View>
+            <Text
+              variant="labelSmall"
+              style={{
+                color: theme.colors.error,
+                textAlign: 'center',
+                marginBottom: 10,
+              }}>
+              {i18n.t('api_error')}
+            </Text>
+          </View>
+        )}
 
         <Button
           theme={{roundness: 2}}

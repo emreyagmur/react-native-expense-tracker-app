@@ -3,11 +3,33 @@ import React from 'react';
 import {View} from 'react-native';
 import {Avatar, Button, Card, Text, useTheme} from 'react-native-paper';
 import i18n from '../../lang/_i18n';
+import {useSelector} from 'react-redux';
+import {authUserSelector} from '../auth/_store/auth';
+import UserAvatar from '../../components/UserAvatar';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {useNavigation} from '@react-navigation/native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+
+export type StackParamList = {
+  TransactionInfo: {itemId: number};
+  Transaction: {type: string};
+};
+
+type NavigationProps = StackNavigationProp<StackParamList>;
 
 const Home = () => {
   const theme = useTheme();
+  const user = useSelector(authUserSelector);
+  const navigation = useNavigation<NavigationProps>();
+  const insets = useSafeAreaInsets();
+
   return (
-    <View style={{flex: 1, backgroundColor: theme.colors.background}}>
+    <View
+      style={{
+        flex: 1,
+        paddingTop: insets.top,
+        backgroundColor: theme.colors.background,
+      }}>
       <View
         style={{
           display: 'flex',
@@ -16,8 +38,12 @@ const Home = () => {
           padding: 10,
           backgroundColor: theme.colors.background,
         }}>
-        <Avatar.Text size={32} label="EY" style={{marginRight: 10}} />
-        <Text variant="bodyMedium">{i18n.t('hello')}, Emre</Text>
+        <View style={{marginRight: 5}}>
+          <UserAvatar user={user} size={40} />
+        </View>
+        <Text variant="bodyMedium">
+          {i18n.t('hello')}, {user?.name}
+        </Text>
       </View>
       <View style={{padding: 10, backgroundColor: theme.colors.background}}>
         <Card>
@@ -64,7 +90,7 @@ const Home = () => {
           }}
           icon={() => <Plus size={18} color={theme.colors.onPrimary} />}
           mode="contained"
-          onPress={() => console.log('Pressed')}>
+          onPress={() => navigation.navigate('Transaction', {type: 'income'})}>
           {i18n.t('login')}
         </Button>
         <Button
@@ -75,7 +101,7 @@ const Home = () => {
           }}
           icon={() => <Minus size={18} color={theme.colors.onError} />}
           mode="contained"
-          onPress={() => console.log('Pressed')}>
+          onPress={() => navigation.navigate('Transaction', {type: 'expense'})}>
           {i18n.t('login')}
         </Button>
       </View>

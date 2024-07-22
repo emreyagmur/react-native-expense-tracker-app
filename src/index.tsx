@@ -1,18 +1,19 @@
 import React from 'react';
-import {SafeAreaView, useColorScheme} from 'react-native';
 import {createStackNavigator} from '@react-navigation/stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Login from './screens/auth/Login';
 import Register from './screens/auth/Register';
 import Home from './screens/home/Home';
-import {BottomNavigation, useTheme} from 'react-native-paper';
+import {BottomNavigation, IconButton, useTheme} from 'react-native-paper';
 import Account from './screens/account/Account';
-import {House, User} from 'lucide-react-native';
+import {ChevronLeft, House, User} from 'lucide-react-native';
 import {CommonActions} from '@react-navigation/native';
 import {useSelector} from 'react-redux';
 import {authAccessTokenSelector} from './screens/auth/_store/auth';
 import axios from 'axios';
 import Splash from './screens/Splash';
+import Transaction from './screens/transaction/Transaction';
+import i18n from './lang/_i18n';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -101,6 +102,8 @@ const BottomTab = () => {
 };
 
 const Main = () => {
+  const theme = useTheme();
+
   const [isLogin, setIsLogin] = React.useState<boolean>(false);
   const [loading, setLoading] = React.useState<boolean>(true);
 
@@ -117,10 +120,8 @@ const Main = () => {
     setLoading(false);
   }, [accessToken]);
 
-  const theme = useTheme();
   return (
     <>
-      <SafeAreaView style={{backgroundColor: theme.colors.background}} />
       <Stack.Navigator>
         {loading ? (
           <Stack.Screen
@@ -134,6 +135,26 @@ const Main = () => {
               name="Main"
               component={BottomTab}
               options={{headerShown: false}}
+            />
+            <Stack.Screen
+              name="Transaction"
+              component={Transaction}
+              options={({navigation}) => ({
+                headerTitle: i18n.t('new_transaction'),
+                headerTitleStyle: {
+                  color: theme.colors.onSurfaceVariant,
+                },
+                headerLeft: () => (
+                  <IconButton
+                    onPress={() => navigation.goBack()}
+                    icon={() => <ChevronLeft color="#0A84FF" size={25} />}
+                  />
+                ),
+                headerStyle: {
+                  backgroundColor: theme.colors.background,
+                },
+                headerShadowVisible: false,
+              })}
             />
           </>
         ) : (
