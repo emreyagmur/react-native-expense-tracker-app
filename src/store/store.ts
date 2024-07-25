@@ -5,10 +5,11 @@ import {persistStore} from 'redux-persist';
 import {all} from 'redux-saga/effects';
 import * as auth from '../screens/auth/_store/auth';
 import * as currency from './currency';
+import * as userTransactions from '../screens/transaction/_store/transaction';
 import logger from 'redux-logger';
 
 export function* rootSaga() {
-  const mainSagas = [auth.saga(), currency.saga()];
+  const mainSagas = [auth.saga(), currency.saga(), userTransactions.saga()];
   yield all(mainSagas);
 }
 

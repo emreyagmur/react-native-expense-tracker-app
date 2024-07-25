@@ -1,14 +1,53 @@
-import {Minus, Plus} from 'lucide-react-native';
+import {
+  ArrowDown,
+  ArrowUp,
+  ChevronRight,
+  Minus,
+  Plus,
+} from 'lucide-react-native';
 import React from 'react';
-import {View} from 'react-native';
-import {Avatar, Button, Card, Text, useTheme} from 'react-native-paper';
+import {TouchableOpacity, View} from 'react-native';
+import {
+  ActivityIndicator,
+  Button,
+  Card,
+  Text,
+  useTheme,
+} from 'react-native-paper';
 import i18n from '../../lang/_i18n';
-import {useSelector} from 'react-redux';
-import {authUserSelector} from '../auth/_store/auth';
+import {ConnectedProps, connect, useDispatch, useSelector} from 'react-redux';
+import {
+  authCurrencySelector,
+  authUserSelector,
+  userLocaleSelector,
+} from '../auth/_store/auth';
 import UserAvatar from '../../components/UserAvatar';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {useNavigation} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {RootState} from '../../store/store';
+import {
+  ITransaction,
+  userTransactionsActions,
+  userTransactionsPhaseSelector,
+  userTransactionsSelector,
+} from '../transaction/_store/transaction';
+import {FlashList} from '@shopify/flash-list';
+import moment from 'moment';
+import 'moment/min/locales';
+import {NumericFormat} from 'react-number-format';
+
+const mapStateToProps = (state: RootState) => ({
+  user: authUserSelector(state),
+  userLocale: userLocaleSelector(state),
+  userTransactions: userTransactionsSelector(state),
+  currency: authCurrencySelector(state),
+  phase: userTransactionsPhaseSelector(state),
+});
+
+const connector = connect(mapStateToProps);
+type PropsFromRedux = ConnectedProps<typeof connector>;
+type THomeProps = PropsFromRedux;
 
 export type StackParamList = {
   TransactionInfo: {itemId: number};
@@ -17,11 +56,49 @@ export type StackParamList = {
 
 type NavigationProps = StackNavigationProp<StackParamList>;
 
-const Home = () => {
+const Home = (props: THomeProps) => {
+  const {user, userTransactions, userLocale, currency, phase} = props;
+  const dispatch = useDispatch();
+
+  console.log(currency);
   const theme = useTheme();
-  const user = useSelector(authUserSelector);
   const navigation = useNavigation<NavigationProps>();
   const insets = useSafeAreaInsets();
+
+  moment.locale(userLocale ? userLocale?.languageCode : 'en');
+
+  const listCount = userTransactions?.length > 0 ? userTransactions.length : 1;
+
+  const [totalIncomes, setTotalIncomes] = React.useState<number>(0);
+  const [totalExpenses, setTotalExpenses] = React.useState<number>(0);
+  const [totalBalance, setTotalBalance] = React.useState<number>(0);
+
+  React.useEffect(() => {
+    const tIncomes = () => {
+      return userTransactions?.filter(
+        (incomes: Partial<ITransaction>) => incomes.type === 'income',
+      );
+    };
+
+    const tExpenses = () => {
+      return userTransactions?.filter(
+        (incomes: Partial<ITransaction>) => incomes.type === 'expense',
+      );
+    };
+
+    setTotalIncomes(
+      tIncomes().reduce((a, v) => (a = a + parseInt(v.amount)), 0),
+    );
+    setTotalExpenses(
+      tExpenses().reduce((a, v) => (a = a + parseInt(v.amount)), 0),
+    );
+
+    setTotalBalance(totalIncomes - totalExpenses);
+  }, [userTransactions, totalIncomes, totalExpenses]);
+
+  React.useEffect(() => {
+    dispatch(userTransactionsActions.pullUserTransactions(user));
+  }, []);
 
   return (
     <View
@@ -54,7 +131,15 @@ const Home = () => {
                 padding: 10,
               }}>
               <Text variant="titleSmall">Total Balance</Text>
-              <Text variant="titleLarge">$500.245.123,12</Text>
+              <NumericFormat
+                value={totalBalance}
+                displayType={'text'}
+                thousandSeparator={true}
+                prefix={currency?.symbol}
+                renderText={formattedValue => (
+                  <Text variant="titleLarge">{formattedValue}</Text>
+                )}
+              />
             </View>
             <View
               style={{
@@ -65,11 +150,27 @@ const Home = () => {
               }}>
               <View style={{alignItems: 'center'}}>
                 <Text variant="bodySmall">Total Income</Text>
-                <Text variant="bodyMedium">$500.245.123,12</Text>
+                <NumericFormat
+                  value={totalIncomes}
+                  displayType={'text'}
+                  thousandSeparator={true}
+                  prefix={currency?.symbol}
+                  renderText={formattedValue => (
+                    <Text variant="bodyMedium">{formattedValue}</Text>
+                  )}
+                />
               </View>
               <View style={{alignItems: 'center'}}>
                 <Text variant="bodySmall">Total Expense</Text>
-                <Text variant="bodyMedium">$500.245.123,12</Text>
+                <NumericFormat
+                  value={totalExpenses}
+                  displayType={'text'}
+                  thousandSeparator={true}
+                  prefix={currency?.symbol}
+                  renderText={formattedValue => (
+                    <Text variant="bodyMedium">{formattedValue}</Text>
+                  )}
+                />
               </View>
             </View>
           </Card.Content>
@@ -91,7 +192,7 @@ const Home = () => {
           icon={() => <Plus size={18} color={theme.colors.onPrimary} />}
           mode="contained"
           onPress={() => navigation.navigate('Transaction', {type: 'income'})}>
-          {i18n.t('login')}
+          {i18n.t('add_income')}
         </Button>
         <Button
           buttonColor={theme.colors.error}
@@ -102,11 +203,115 @@ const Home = () => {
           icon={() => <Minus size={18} color={theme.colors.onError} />}
           mode="contained"
           onPress={() => navigation.navigate('Transaction', {type: 'expense'})}>
-          {i18n.t('login')}
+          {i18n.t('add_expense')}
         </Button>
+      </View>
+
+      <View style={{flex: 1, padding: 10}}>
+        {phase === 'loading' ? (
+          <View style={{flex: 1, justifyContent: 'center'}}>
+            <ActivityIndicator
+              color={theme.colors.onPrimary}
+              size={28}
+              animating={true}
+            />
+          </View>
+        ) : (
+          <FlashList
+            data={userTransactions}
+            renderItem={({item}) => (
+              <TouchableOpacity style={{marginBottom: 10}}>
+                <View
+                  style={{
+                    backgroundColor: theme.colors.background,
+                  }}>
+                  <Card>
+                    <Card.Content
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                      }}>
+                      <View
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          flex: 1,
+                        }}>
+                        {item.type === 'income' ? (
+                          <ArrowDown
+                            size={18}
+                            style={{marginRight: 10}}
+                            color={theme.colors.onSurfaceVariant}
+                          />
+                        ) : (
+                          <ArrowUp
+                            size={18}
+                            style={{marginRight: 10}}
+                            color={theme.colors.onSurfaceVariant}
+                          />
+                        )}
+
+                        <View
+                          style={{
+                            gap: 5,
+                            maxWidth: '100%',
+                            flex: 1,
+                          }}>
+                          <View
+                            style={{
+                              display: 'flex',
+                              flexDirection: 'row',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              flex: 1,
+                            }}>
+                            <NumericFormat
+                              value={item?.amount}
+                              displayType={'text'}
+                              thousandSeparator={true}
+                              prefix={currency?.symbol}
+                              renderText={formattedValue => (
+                                <Text variant="bodyMedium">
+                                  {formattedValue}
+                                </Text>
+                              )}
+                            />
+                            <Text variant="bodySmall">
+                              {moment(item?.created_at).fromNow()}
+                            </Text>
+                          </View>
+
+                          <Text numberOfLines={1} variant="bodySmall">
+                            {item?.title}
+                          </Text>
+                        </View>
+                      </View>
+                      <View
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'row',
+                          justifyContent: 'flex-end',
+                          alignItems: 'center',
+                          padding: 5,
+                        }}>
+                        <ChevronRight
+                          size={18}
+                          color={theme.colors.onSurfaceVariant}
+                        />
+                      </View>
+                    </Card.Content>
+                  </Card>
+                </View>
+              </TouchableOpacity>
+            )}
+            estimatedItemSize={listCount}
+          />
+        )}
       </View>
     </View>
   );
 };
 
-export default Home;
+export default connector(Home);

@@ -24,6 +24,13 @@ export interface IUserType {
   user_type_title: string;
 }
 
+export interface IUserLocale {
+  countryCode?: string;
+  isRTL?: boolean;
+  languageCode?: string;
+  languageTag?: string;
+}
+
 export interface IUser {
   id: number;
   name?: string;
@@ -42,6 +49,7 @@ export interface IUser {
 interface IAuthState {
   user?: IUser;
   accessToken?: string;
+  userLocale?: IUserLocale;
   theme?: string;
   currency?: ICurrency;
   lang?: string;
@@ -74,12 +82,14 @@ export const actionTypes = {
   DELETE_USER: 'auth/DELETE_USER',
   UPDATE_USER_PASSWORD: 'auth/UPDATE_USER_PASSWORD',
   UPDATE_USER_INFO: 'auth/UPDATE_USER_INFO',
+  SET_USER_LOCALE: 'auth/SET_USER_LOCALE',
   UPDATE_USER: 'auth/UPDATE_USER',
 };
 
 export const initialAuthState: IAuthState = {
   user: null,
   accessToken: null,
+  userLocale: null,
   theme: 'dark',
   currency: null,
   lang: 'en',
@@ -94,6 +104,10 @@ export const authSelector = createSelector(
 export const authAccessTokenSelector = createSelector(
   (state: IParentAuthState) => objectPath.get(state, ['auth', 'accessToken']),
   (accessToken: string) => accessToken,
+);
+export const userLocaleSelector = createSelector(
+  (state: IParentAuthState) => objectPath.get(state, ['auth', 'userLocale']),
+  (userLocale: IUserLocale) => userLocale,
 );
 export const authThemeSelector = createSelector(
   (state: IParentAuthState) => objectPath.get(state, ['auth', 'theme']),
@@ -159,6 +173,10 @@ export const authReducer = persistReducer(
         const {currency, user} = action.payload;
         return {...state, currency, user};
       }
+      case actionTypes.SET_USER_LOCALE: {
+        const {userLocale} = action.payload;
+        return {...state, userLocale};
+      }
       case actionTypes.SET_LANG: {
         const {lang} = action.payload;
         i18n.locale = lang;
@@ -209,6 +227,10 @@ export const authActions = {
   setTheme: (theme: string) => ({
     type: actionTypes.SET_THEME,
     payload: {theme},
+  }),
+  setUserLocale: (userLocale: IUserLocale) => ({
+    type: actionTypes.SET_USER_LOCALE,
+    payload: {userLocale},
   }),
   setCurrency: (currency: ICurrency, user: IUser) => ({
     type: actionTypes.SET_CURRENCY,

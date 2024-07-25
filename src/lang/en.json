@@ -1,7 +1,11 @@
 {
+  "add_income": "Add Income",
+  "add_expense": "Add Expense",
   "api_error": "An error occurred, try again later",
+  "amount": "Amount",
   "hello": "Hello",
   "cannot_be_empty": "Cannot be empty!",
+  "date": "Date",
   "dont_have_an_account": "Don't have an account?",
   "email": "E-mail",
   "have_an_account": "Have an account?",
@@ -12,5 +16,8 @@
   "name_lastname": "Name & Lastname",
   "new_transaction": "New Transaction",
   "password": "Password",
-  "register": "Sign up"
+  "please_wait": "Please wait...",
+  "register": "Sign up",
+  "save": "Save",
+  "title": "Title"
 }

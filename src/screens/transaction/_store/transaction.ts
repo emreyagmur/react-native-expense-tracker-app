@@ -7,7 +7,7 @@ import axios from 'axios';
 import {ICurrency} from '../../../store/currency';
 import {IUser} from '../../auth/_store/auth';
 import {IAction} from '../../../store/store';
-import {BASE_URL} from 'src/store/ApiUrl';
+import {BASE_URL} from '../../../store/ApiUrl';
 import {produce} from 'immer';
 
 export type TPhase =
@@ -34,7 +34,7 @@ export interface ITransaction {
 }
 
 interface ITransactionState {
-  incomeExpenses: ITransaction[];
+  userTransactions: ITransaction[];
   phase: TPhase;
 }
 
@@ -42,68 +42,68 @@ type TActionAllState = ITransactionState & {
   id: number;
   user: IUser;
   currency: ICurrency;
-  incomeExpense: ITransaction;
-  incomeExpenseInfo: Partial<ITransaction>;
+  userTransaction: ITransaction;
+  userTransactionInfo: Partial<ITransaction>;
 };
 
 export const actionTypes = {
-  PULL_INCOME_EXPENSES: 'incomeExpenses/PULL_INCOME_EXPENSES',
-  SET_INCOME_EXPENSES: 'incomeExpenses/SET_INCOME_EXPENSES',
-  ADD_INCOME_EXPENSE: 'incomeExpenses/ADD_INCOME_EXPENSE',
-  UPDATE_INCOME_EXPENSE: 'incomeExpenses/UPDATE_INCOME_EXPENSE',
-  DELETE_INCOME_EXPENSE: 'incomeExpenses/DELETE_INCOME_EXPENSE',
-  REMOVE_INCOME_EXPENSE: 'incomeExpenses/REMOVE_INCOME_EXPENSE',
-  SET_INCOME_EXPENSE: 'incomeExpenses/SET_INCOME_EXPENSE',
-  SET_PHASE: 'incomeExpenses/SET_PHASE',
+  PULL_USER_TRANSACTIONS: 'userTransactions/PULL_USER_TRANSACTIONS',
+  SET_USER_TRANSACTIONS: 'userTransactions/SET_USER_TRANSACTIONS',
+  ADD_USER_TRANSACTION: 'userTransactions/ADD_USER_TRANSACTION',
+  UPDATE_USER_TRANSACTION: 'userTransactions/UPDATE_USER_TRANSACTION',
+  DELETE_USER_TRANSACTION: 'userTransactions/DELETE_USER_TRANSACTION',
+  REMOVE_USER_TRANSACTION: 'userTransactions/REMOVE_USER_TRANSACTION',
+  SET_USER_TRANSACTION: 'userTransactions/SET_USER_TRANSACTION',
+  SET_PHASE: 'userTransactions/SET_PHASE',
 };
 
 export const initialState: ITransactionState = {
-  incomeExpenses: [],
+  userTransactions: [],
   phase: null,
 };
 
-export const incomeExpensesSelector = createSelector(
+export const userTransactionsSelector = createSelector(
   (state: ITransactionState) =>
-    objectPath.get(state, ['incomeExpenses', 'incomeExpenses']),
-  (incomeExpenses: ITransaction[]) => incomeExpenses,
+    objectPath.get(state, ['userTransactions', 'userTransactions']),
+  (userTransactions: ITransaction[]) => userTransactions,
 );
 
-export const incomeExpensesPhaseSelector = createSelector(
+export const userTransactionsPhaseSelector = createSelector(
   (state: ITransactionState) =>
-    objectPath.get(state, ['incomeExpenses', 'phase']),
+    objectPath.get(state, ['userTransactions', 'phase']),
   (phase: string) => phase,
 );
 
-export const incomeExpenseReducer = persistReducer(
-  {storage: AsyncStorage, key: 'income-expense'},
+export const userTransactionsReducer = persistReducer(
+  {storage: AsyncStorage, key: 'userTransactions'},
   (
     state: ITransactionState = initialState,
     action: IAction<TActionAllState>,
   ): ITransactionState => {
     switch (action.type) {
-      case actionTypes.SET_INCOME_EXPENSES: {
-        const {incomeExpenses} = action.payload;
-        return {...state, incomeExpenses};
+      case actionTypes.SET_USER_TRANSACTIONS: {
+        const {userTransactions} = action.payload;
+        return {...state, userTransactions};
       }
-      case actionTypes.SET_INCOME_EXPENSE: {
-        const {incomeExpense} = action.payload;
+      case actionTypes.SET_USER_TRANSACTION: {
+        const {userTransaction} = action.payload;
         return produce(state, draftState => {
-          const index = draftState.incomeExpenses.findIndex(
-            d => d.id === incomeExpense.id,
+          const index = draftState.userTransactions.findIndex(
+            d => d.id === userTransaction.id,
           );
           if (index > -1) {
-            draftState.incomeExpenses[index] = incomeExpense;
+            draftState.userTransactions[index] = userTransaction;
           } else {
-            draftState.incomeExpenses.unshift(incomeExpense);
+            draftState.userTransactions.unshift(userTransaction);
           }
         });
       }
-      case actionTypes.REMOVE_INCOME_EXPENSE: {
+      case actionTypes.REMOVE_USER_TRANSACTION: {
         const {id} = action.payload;
-        const incomeExpenses = {...state}.incomeExpenses.filter(
+        const userTransactions = {...state}.userTransactions.filter(
           d => d.id !== id,
         );
-        return {...state, incomeExpenses};
+        return {...state, userTransactions};
       }
       case actionTypes.SET_PHASE: {
         const {phase} = action.payload;
@@ -115,44 +115,43 @@ export const incomeExpenseReducer = persistReducer(
   },
 );
 
-export const incomeExpensesActions = {
-  pullIncomeExpenses: (user: IUser): IAction<Partial<TActionAllState>> => ({
-    type: actionTypes.PULL_INCOME_EXPENSES,
+export const userTransactionsActions = {
+  pullUserTransactions: (user: IUser): IAction<Partial<TActionAllState>> => ({
+    type: actionTypes.PULL_USER_TRANSACTIONS,
     payload: {user},
   }),
-  setIncomeExpenses: (
-    incomeExpenses: ITransaction[],
+  setUserTransactions: (
+    userTransactions: ITransaction[],
   ): IAction<Partial<TActionAllState>> => ({
-    type: actionTypes.SET_INCOME_EXPENSES,
-    payload: {incomeExpenses},
+    type: actionTypes.SET_USER_TRANSACTIONS,
+    payload: {userTransactions},
   }),
-  addIncomeExpense: (
-    incomeExpenseInfo: Partial<ITransaction>,
+  addUserTransaction: (
+    userTransactionInfo: Partial<ITransaction>,
     user: IUser,
-    currency: ICurrency,
   ): IAction<Partial<TActionAllState>> => ({
-    type: actionTypes.ADD_INCOME_EXPENSE,
-    payload: {incomeExpenseInfo, user, currency},
+    type: actionTypes.ADD_USER_TRANSACTION,
+    payload: {userTransactionInfo, user},
   }),
-  updateIncomeExpense: (
-    incomeExpenseInfo: Partial<ITransaction>,
+  updateUserTransaction: (
+    userTransactionInfo: Partial<ITransaction>,
   ): IAction<Partial<TActionAllState>> => ({
-    type: actionTypes.UPDATE_INCOME_EXPENSE,
-    payload: {incomeExpenseInfo},
+    type: actionTypes.UPDATE_USER_TRANSACTION,
+    payload: {userTransactionInfo},
   }),
-  deleteIncomeExpense: (id: number): IAction<Partial<TActionAllState>> => ({
-    type: actionTypes.DELETE_INCOME_EXPENSE,
+  deleteUserTransaction: (id: number): IAction<Partial<TActionAllState>> => ({
+    type: actionTypes.DELETE_USER_TRANSACTION,
     payload: {id},
   }),
-  removeIncomeExpense: (id: number): IAction<Partial<TActionAllState>> => ({
-    type: actionTypes.REMOVE_INCOME_EXPENSE,
+  removeUserTransaction: (id: number): IAction<Partial<TActionAllState>> => ({
+    type: actionTypes.REMOVE_USER_TRANSACTION,
     payload: {id},
   }),
-  setIncomeExpense: (
-    incomeExpense: ITransaction,
+  setUserTransaction: (
+    userTransaction: ITransaction,
   ): IAction<Partial<TActionAllState>> => ({
-    type: actionTypes.SET_INCOME_EXPENSE,
-    payload: {incomeExpense},
+    type: actionTypes.SET_USER_TRANSACTION,
+    payload: {userTransaction},
   }),
   setPhase: (phase: TPhase): IAction<Partial<TActionAllState>> => ({
     type: actionTypes.SET_PHASE,
@@ -162,107 +161,104 @@ export const incomeExpensesActions = {
 
 export function* saga() {
   yield takeLatest(
-    actionTypes.PULL_INCOME_EXPENSES,
-    function* pullIncomeExpenseSaga({
+    actionTypes.PULL_USER_TRANSACTIONS,
+    function* pullUserTransactionsaga({
       payload,
     }: IAction<Partial<TActionAllState>>) {
-      yield put(incomeExpensesActions.setPhase('loading'));
+      yield put(userTransactionsActions.setPhase('loading'));
 
       const {user} = payload;
       const response = yield axios.get(`${BASE_URL}/get-expenses/${user.id}`);
 
       if (response === undefined) {
-        yield put(incomeExpensesActions.setPhase('error'));
+        yield put(userTransactionsActions.setPhase('error'));
         return;
       } else if (response.status !== 200) {
-        yield put(incomeExpensesActions.setPhase('error'));
+        yield put(userTransactionsActions.setPhase('error'));
         return;
       }
 
       const {expenses} = response.data;
 
-      yield put(incomeExpensesActions.setIncomeExpenses(expenses));
-      yield put(incomeExpensesActions.setPhase('success'));
+      yield put(userTransactionsActions.setUserTransactions(expenses));
+      yield put(userTransactionsActions.setPhase('success'));
     },
   );
 
   yield takeLatest(
-    actionTypes.ADD_INCOME_EXPENSE,
-    function* addIncomeExpensesSaga({
+    actionTypes.ADD_USER_TRANSACTION,
+    function* adduserTransactionsSaga({
       payload,
     }: IAction<Partial<TActionAllState>>) {
-      yield put(incomeExpensesActions.setPhase('loading'));
+      yield put(userTransactionsActions.setPhase('loading'));
 
-      const {incomeExpenseInfo, user, currency} = payload;
-
-      console.log(incomeExpenseInfo, currency);
+      const {userTransactionInfo, user} = payload;
 
       const response = yield axios.post(`${BASE_URL}/create-expense`, {
-        title: incomeExpenseInfo.title,
-        amount: incomeExpenseInfo.amount.toString(),
-        type: incomeExpenseInfo.type,
-        category_id: incomeExpenseInfo.category_id,
+        title: userTransactionInfo.title,
+        amount: userTransactionInfo.amount.toString(),
+        type: userTransactionInfo.type,
+        category_id: userTransactionInfo.category_id,
         user_id: user.id,
-        currency_id: currency.id,
-        created_at: incomeExpenseInfo.created_at,
+        created_at: userTransactionInfo.created_at,
       });
 
       if (response.status !== 200 || response === undefined) {
-        yield put(incomeExpensesActions.setPhase('error'));
+        yield put(userTransactionsActions.setPhase('error'));
         return;
       }
 
       const {expenses} = response.data;
 
-      yield put(incomeExpensesActions.setIncomeExpense(expenses));
-      yield put(incomeExpensesActions.setPhase('adding-success'));
+      yield put(userTransactionsActions.setUserTransaction(expenses));
+      yield put(userTransactionsActions.setPhase('adding-success'));
     },
   );
 
   yield takeLatest(
-    actionTypes.UPDATE_INCOME_EXPENSE,
+    actionTypes.UPDATE_USER_TRANSACTION,
     function* updateAccountCodeSaga({
       payload,
     }: IAction<Partial<TActionAllState>>) {
-      yield put(incomeExpensesActions.setPhase('updating'));
+      yield put(userTransactionsActions.setPhase('updating'));
 
-      const {incomeExpenseInfo} = payload;
+      const {userTransactionInfo} = payload;
       const response = yield axios.patch(
-        `${BASE_URL}/update-expense/${incomeExpenseInfo.id}`,
+        `${BASE_URL}/update-expense/${userTransactionInfo.id}`,
         {
-          title: incomeExpenseInfo.title,
-          amount: incomeExpenseInfo.amount.toString(),
+          title: userTransactionInfo.title,
+          amount: userTransactionInfo.amount.toString(),
         },
       );
 
       if (response.status !== 200 || response === undefined) {
-        yield put(incomeExpensesActions.setPhase('error'));
+        yield put(userTransactionsActions.setPhase('error'));
         return;
       }
 
       const {expense} = response.data;
 
-      yield put(incomeExpensesActions.setIncomeExpense(expense));
-      yield put(incomeExpensesActions.setPhase('success'));
+      yield put(userTransactionsActions.setUserTransaction(expense));
+      yield put(userTransactionsActions.setPhase('success'));
     },
   );
 
   yield takeLatest(
-    actionTypes.DELETE_INCOME_EXPENSE,
+    actionTypes.DELETE_USER_TRANSACTION,
     function* deleteAccountCodeSaga({
       payload,
     }: IAction<Partial<TActionAllState>>) {
-      yield put(incomeExpensesActions.setPhase('loading'));
+      yield put(userTransactionsActions.setPhase('loading'));
 
       const {id} = payload;
       const response = yield axios.post(`${BASE_URL}/delete-expense/${id}`);
 
       if (response.status !== 200) {
-        yield put(incomeExpensesActions.setPhase('error'));
+        yield put(userTransactionsActions.setPhase('error'));
         return;
       }
-      yield put(incomeExpensesActions.removeIncomeExpense(id));
-      yield put(incomeExpensesActions.setPhase('deleted-success'));
+      yield put(userTransactionsActions.removeUserTransaction(id));
+      yield put(userTransactionsActions.setPhase('deleted-success'));
     },
   );
 }

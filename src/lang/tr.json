@@ -1,7 +1,11 @@
 {
+  "add_income": "Gelir Ekle",
+  "add_expense": "Gider Ekle",
   "api_error": "Bir hata oluştu daha sonra tekrar deneyin",
+  "amount": "Miktar",
   "hello": "Merhaba",
   "cannot_be_empty": "Bu alan boş olamaz!",
+  "date": "Tarih",
   "dont_have_an_account": "Hesabınız yok mu?",
   "email": "E-posta",
   "have_an_account": "Hesabın var mı?",
@@ -12,5 +16,8 @@
   "name_lastname": "Ad Soyad",
   "new_transaction": "Yeni İşlem",
   "password": "Şifre",
-  "register": "Hesap Oluştur"
+  "please_wait": "Lütfen bekleyin...",
+  "register": "Hesap Oluştur",
+  "save": "Kaydet",
+  "title": "İşlem Başlığı"
 }
