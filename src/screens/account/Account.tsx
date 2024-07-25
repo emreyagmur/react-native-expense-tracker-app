@@ -1,5 +1,5 @@
 import React from 'react';
-import {User, ChevronRight, LogOut} from 'lucide-react-native';
+import {User, ChevronRight, LogOut, Banknote} from 'lucide-react-native';
 import {TouchableOpacity, View} from 'react-native';
 import {ActivityIndicator, Card, Text, useTheme} from 'react-native-paper';
 import {RootState} from 'src/store/store';
@@ -10,6 +10,10 @@ import {
 } from '../auth/_store/auth';
 import {ConnectedProps, connect, useDispatch} from 'react-redux';
 import UserAvatar from '../../components/UserAvatar';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import i18n from '../../lang/_i18n';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {useNavigation} from '@react-navigation/native';
 
 const mapStateToProps = (state: RootState) => ({
   user: authUserSelector(state),
@@ -20,10 +24,18 @@ const connector = connect(mapStateToProps);
 type PropsFromRedux = ConnectedProps<typeof connector>;
 type TAccountProps = PropsFromRedux;
 
+export type StackParamList = {
+  Currency: undefined;
+};
+
+type NavigationProps = StackNavigationProp<StackParamList>;
+
 const Account: React.FC<TAccountProps> = props => {
   const {user, phase} = props;
   const theme = useTheme();
   const dispatch = useDispatch();
+  const insets = useSafeAreaInsets();
+  const navigation = useNavigation<NavigationProps>();
   const [isLoading, setLoading] = React.useState<boolean>(false);
 
   const handleLogout = () => {
@@ -35,7 +47,12 @@ const Account: React.FC<TAccountProps> = props => {
   };
 
   return (
-    <View style={{backgroundColor: theme.colors.background, flex: 1}}>
+    <View
+      style={{
+        backgroundColor: theme.colors.background,
+        flex: 1,
+        paddingTop: insets.top,
+      }}>
       <View style={{padding: 10, backgroundColor: theme.colors.background}}>
         <Card>
           <Card.Content>
@@ -61,7 +78,7 @@ const Account: React.FC<TAccountProps> = props => {
         </Card>
       </View>
 
-      <TouchableOpacity>
+      <TouchableOpacity onPress={() => navigation.navigate('Currency')}>
         <View style={{padding: 10, backgroundColor: theme.colors.background}}>
           <Card>
             <Card.Content
@@ -77,12 +94,12 @@ const Account: React.FC<TAccountProps> = props => {
                   justifyContent: 'center',
                   alignItems: 'center',
                 }}>
-                <User
+                <Banknote
                   size={18}
                   style={{marginRight: 10}}
                   color={theme.colors.onSurfaceVariant}
                 />
-                <Text variant="bodySmall">Settings</Text>
+                <Text variant="bodySmall">{i18n.t('currency')}</Text>
               </View>
               <View
                 style={{

@@ -8,12 +8,15 @@ import {BottomNavigation, IconButton, useTheme} from 'react-native-paper';
 import Account from './screens/account/Account';
 import {ChevronLeft, House, User} from 'lucide-react-native';
 import {CommonActions} from '@react-navigation/native';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {authAccessTokenSelector} from './screens/auth/_store/auth';
 import axios from 'axios';
 import Splash from './screens/Splash';
 import Transaction from './screens/transaction/Transaction';
 import i18n from './lang/_i18n';
+import TransactionInfo from './screens/transaction/TransactionInfo';
+import {currencyActions} from './store/currency';
+import Currency from './screens/account/Currency';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -104,6 +107,7 @@ const BottomTab = () => {
 const Main = () => {
   const theme = useTheme();
 
+  const dispatch = useDispatch();
   const [isLogin, setIsLogin] = React.useState<boolean>(false);
   const [loading, setLoading] = React.useState<boolean>(true);
 
@@ -112,6 +116,7 @@ const Main = () => {
   React.useEffect(() => {
     if (accessToken) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+      dispatch(currencyActions.pullCurrencies());
       setIsLogin(true);
     } else {
       setIsLogin(false);
@@ -141,6 +146,46 @@ const Main = () => {
               component={Transaction}
               options={({navigation}) => ({
                 headerTitle: i18n.t('new_transaction'),
+                headerTitleStyle: {
+                  color: theme.colors.onSurfaceVariant,
+                },
+                headerLeft: () => (
+                  <IconButton
+                    onPress={() => navigation.goBack()}
+                    icon={() => <ChevronLeft color="#0A84FF" size={25} />}
+                  />
+                ),
+                headerStyle: {
+                  backgroundColor: theme.colors.background,
+                },
+                headerShadowVisible: false,
+              })}
+            />
+            <Stack.Screen
+              name="TransactionInfo"
+              component={TransactionInfo}
+              options={({navigation}) => ({
+                headerTitle: i18n.t('new_transaction'),
+                headerTitleStyle: {
+                  color: theme.colors.onSurfaceVariant,
+                },
+                headerLeft: () => (
+                  <IconButton
+                    onPress={() => navigation.goBack()}
+                    icon={() => <ChevronLeft color="#0A84FF" size={25} />}
+                  />
+                ),
+                headerStyle: {
+                  backgroundColor: theme.colors.background,
+                },
+                headerShadowVisible: false,
+              })}
+            />
+            <Stack.Screen
+              name="Currency"
+              component={Currency}
+              options={({navigation}) => ({
+                headerTitle: i18n.t('currency'),
                 headerTitleStyle: {
                   color: theme.colors.onSurfaceVariant,
                 },

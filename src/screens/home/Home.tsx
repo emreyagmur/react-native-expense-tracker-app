@@ -15,8 +15,9 @@ import {
   useTheme,
 } from 'react-native-paper';
 import i18n from '../../lang/_i18n';
-import {ConnectedProps, connect, useDispatch, useSelector} from 'react-redux';
+import {ConnectedProps, connect, useDispatch} from 'react-redux';
 import {
+  authActions,
   authCurrencySelector,
   authUserSelector,
   userLocaleSelector,
@@ -36,12 +37,15 @@ import {FlashList} from '@shopify/flash-list';
 import moment from 'moment';
 import 'moment/min/locales';
 import {NumericFormat} from 'react-number-format';
+import {currenciesSelector} from '../../store/currency';
+import * as RNLocalize from 'react-native-localize';
 
 const mapStateToProps = (state: RootState) => ({
   user: authUserSelector(state),
   userLocale: userLocaleSelector(state),
   userTransactions: userTransactionsSelector(state),
   currency: authCurrencySelector(state),
+  currencies: currenciesSelector(state),
   phase: userTransactionsPhaseSelector(state),
 });
 
@@ -50,17 +54,17 @@ type PropsFromRedux = ConnectedProps<typeof connector>;
 type THomeProps = PropsFromRedux;
 
 export type StackParamList = {
-  TransactionInfo: {itemId: number};
+  TransactionInfo: {item: Partial<ITransaction>};
   Transaction: {type: string};
 };
 
 type NavigationProps = StackNavigationProp<StackParamList>;
 
 const Home = (props: THomeProps) => {
-  const {user, userTransactions, userLocale, currency, phase} = props;
+  const {user, currencies, userTransactions, userLocale, currency, phase} =
+    props;
   const dispatch = useDispatch();
 
-  console.log(currency);
   const theme = useTheme();
   const navigation = useNavigation<NavigationProps>();
   const insets = useSafeAreaInsets();
@@ -72,6 +76,15 @@ const Home = (props: THomeProps) => {
   const [totalIncomes, setTotalIncomes] = React.useState<number>(0);
   const [totalExpenses, setTotalExpenses] = React.useState<number>(0);
   const [totalBalance, setTotalBalance] = React.useState<number>(0);
+
+  React.useEffect(() => {
+    const deviceCurrencies = RNLocalize.getCurrencies();
+    const c = currencies.find(c => c.code === deviceCurrencies[0]);
+
+    if (c && !currency) {
+      dispatch(authActions.setCurrencyStore(c));
+    }
+  }, []);
 
   React.useEffect(() => {
     const tIncomes = () => {
@@ -98,7 +111,7 @@ const Home = (props: THomeProps) => {
 
   React.useEffect(() => {
     dispatch(userTransactionsActions.pullUserTransactions(user));
-  }, []);
+  }, [currency]);
 
   return (
     <View
@@ -220,7 +233,11 @@ const Home = (props: THomeProps) => {
           <FlashList
             data={userTransactions}
             renderItem={({item}) => (
-              <TouchableOpacity style={{marginBottom: 10}}>
+              <TouchableOpacity
+                style={{marginBottom: 10}}
+                onPress={() =>
+                  navigation.navigate('TransactionInfo', {item: item})
+                }>
                 <View
                   style={{
                     backgroundColor: theme.colors.background,
@@ -279,7 +296,7 @@ const Home = (props: THomeProps) => {
                               )}
                             />
                             <Text variant="bodySmall">
-                              {moment(item?.created_at).fromNow()}
+                              {moment(item?.transaction_date).fromNow()}
                             </Text>
                           </View>
 

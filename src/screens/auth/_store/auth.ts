@@ -75,6 +75,7 @@ export const actionTypes = {
   SET_PHASE: 'auth/SET_PHASE',
   SET_THEME: 'auth/SET_THEME',
   SET_CURRENCY: 'auth/SET_CURRENCY',
+  SET_CURRENCY_STORE: 'auth/SET_CURRENCY_STORE',
   SET_LANG: 'auth/SET_LANG',
   SET_ACTION_PHASE: 'auth/SET_ACTION_PHASE',
   SET_REGISTER: 'auth/SET_REGISTER',
@@ -159,6 +160,7 @@ export const authReducer = persistReducer(
           phase: null,
           error: null,
           user: null,
+          currency: null,
         };
       }
       case actionTypes.SET_PHASE: {
@@ -172,6 +174,10 @@ export const authReducer = persistReducer(
       case actionTypes.SET_CURRENCY: {
         const {currency, user} = action.payload;
         return {...state, currency, user};
+      }
+      case actionTypes.SET_CURRENCY_STORE: {
+        const {currency} = action.payload;
+        return {...state, currency};
       }
       case actionTypes.SET_USER_LOCALE: {
         const {userLocale} = action.payload;
@@ -235,6 +241,10 @@ export const authActions = {
   setCurrency: (currency: ICurrency, user: IUser) => ({
     type: actionTypes.SET_CURRENCY,
     payload: {currency, user},
+  }),
+  setCurrencyStore: (currency: ICurrency) => ({
+    type: actionTypes.SET_CURRENCY_STORE,
+    payload: {currency},
   }),
   setLang: (lang: string) => ({
     type: actionTypes.SET_LANG,

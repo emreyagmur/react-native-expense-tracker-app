@@ -11,16 +11,15 @@ import {
   ActivityIndicator,
   Button,
   Card,
-  IconButton,
   Text,
   TextInput,
   useTheme,
 } from 'react-native-paper';
 import i18n from '../../lang/_i18n';
-import {Calendar, Save} from 'lucide-react-native';
+import {Calendar, Save, Trash2} from 'lucide-react-native';
 import DatePicker from 'react-native-date-picker';
-import {AppDispatch, RootState} from '../../store/store';
-import {IUser, authUserSelector, userLocaleSelector} from '../auth/_store/auth';
+import {RootState} from '../../store/store';
+import {userLocaleSelector} from '../auth/_store/auth';
 import {
   ITransaction,
   userTransactionsActions,
@@ -29,7 +28,6 @@ import {
 import {ConnectedProps, connect, useDispatch} from 'react-redux';
 
 const mapStateToProps = (state: RootState) => ({
-  user: authUserSelector(state),
   userLocale: userLocaleSelector(state),
   phase: userTransactionsPhaseSelector(state),
 });
@@ -40,28 +38,31 @@ type TTransactionProps = PropsFromRedux;
 
 export type StackParamList = {
   Main: undefined;
-  Transaction: {type: string};
+  TransactionInfo: {item: Partial<ITransaction>};
 };
 
 type NavigationProps = StackNavigationProp<StackParamList>;
-type TransactionPageRouteProp = RouteProp<StackParamList, 'Transaction'>;
+type TransactionPageRouteProp = RouteProp<StackParamList, 'TransactionInfo'>;
 
-const Transaction: React.FC<TTransactionProps> = props => {
-  const {user, userLocale, phase} = props;
+const TransactionInfo: React.FC<TTransactionProps> = props => {
+  const {userLocale, phase} = props;
   const dispatch = useDispatch();
 
   const navigation = useNavigation<NavigationProps>();
   const route = useRoute<TransactionPageRouteProp>();
-  const transactionType = route?.params.type;
+  const transactionInfo = route?.params.item;
+  console.log(transactionInfo);
   const theme = useTheme();
 
-  const [selectedDate, setSelectedDate] = React.useState(new Date());
+  const [selectedDate, setSelectedDate] = React.useState(
+    new Date(transactionInfo?.transaction_date),
+  );
   const [openDate, setOpenDate] = React.useState(false);
 
-  const [amount, setAmount] = React.useState('');
+  const [amount, setAmount] = React.useState(transactionInfo.amount.toString());
   const [amountError, setAmountError] = React.useState('');
 
-  const [title, setTitle] = React.useState('');
+  const [title, setTitle] = React.useState(transactionInfo.title);
   const [titleError, setTitleError] = React.useState('');
 
   const handleChangeAmount = (value: string) => {
@@ -75,19 +76,15 @@ const Transaction: React.FC<TTransactionProps> = props => {
   };
 
   const handleSaveTransaction = () => {
-    console.log('asd');
     if (amount != '' && title != '') {
       dispatch(
-        userTransactionsActions.addUserTransaction(
-          {
-            amount: amount.replace(',', '.'),
-            title: title,
-            type: transactionType,
-            category_id: 1,
-            transaction_date: selectedDate,
-          },
-          user,
-        ),
+        userTransactionsActions.updateUserTransaction({
+          id: transactionInfo.id,
+          amount: amount.replace(',', '.'),
+          type: transactionInfo.type,
+          title: title,
+          transaction_date: selectedDate,
+        }),
       );
     } else {
       if (amount === '') setAmountError(i18n.t('cannot_be_empty'));
@@ -98,8 +95,12 @@ const Transaction: React.FC<TTransactionProps> = props => {
     }
   };
 
+  const handleDeleteTransaction = () => {
+    dispatch(userTransactionsActions.deleteUserTransaction(transactionInfo.id));
+  };
+
   React.useEffect(() => {
-    if (phase === 'adding-success') {
+    if (phase === 'updating-success' || phase === 'delete-success') {
       dispatch(userTransactionsActions.setPhase(null));
       navigation.goBack();
     }
@@ -199,16 +200,13 @@ const Transaction: React.FC<TTransactionProps> = props => {
             />
           </View>
         </TouchableOpacity>
-
         <Button
           theme={{roundness: 2}}
           style={{
+            marginTop: 20,
             height: 50,
             justifyContent: 'center',
-            position: 'absolute',
-            bottom: 50,
             width: '100%',
-            left: 10,
           }}
           disabled={phase === 'loading' ? true : false}
           icon={() =>
@@ -226,9 +224,39 @@ const Transaction: React.FC<TTransactionProps> = props => {
           onPress={() => handleSaveTransaction()}>
           {phase === 'loading' ? i18n.t('please_wait') : i18n.t('save')}
         </Button>
+
+        <Button
+          buttonColor={theme.colors.error}
+          theme={{roundness: 2}}
+          style={{
+            height: 50,
+            justifyContent: 'center',
+            position: 'absolute',
+            bottom: 50,
+            width: '100%',
+            left: 10,
+          }}
+          disabled={phase === 'delete-loading' ? true : false}
+          icon={() =>
+            phase === 'delete-loading' ? (
+              <ActivityIndicator
+                color={theme.colors.onPrimary}
+                size={18}
+                animating={true}
+              />
+            ) : (
+              <Trash2 size={18} color={theme.colors.onPrimary} />
+            )
+          }
+          mode="contained"
+          onPress={() => handleDeleteTransaction()}>
+          {phase === 'delete-loading'
+            ? i18n.t('please_wait')
+            : i18n.t('delete')}
+        </Button>
       </View>
     </KeyboardAvoidingView>
   );
 };
 
-export default connector(Transaction);
+export default connector(TransactionInfo);

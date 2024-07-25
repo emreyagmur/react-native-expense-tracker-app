@@ -9,24 +9,14 @@ import {IUser} from '../../auth/_store/auth';
 import {IAction} from '../../../store/store';
 import {BASE_URL} from '../../../store/ApiUrl';
 import {produce} from 'immer';
-
-export type TPhase =
-  | null
-  | 'loading'
-  | 'adding'
-  | 'updating'
-  | 'deleting'
-  | 'error'
-  | 'adding-success'
-  | 'deleted-success'
-  | 'success';
+import moment from 'moment';
 
 export interface ITransaction {
   id: number;
   title: string;
   amount: string;
   category_id: number;
-  created_at: Date;
+  transaction_date: Date;
   user_id: number;
   type: string;
   currency_id: number;
@@ -35,7 +25,7 @@ export interface ITransaction {
 
 interface ITransactionState {
   userTransactions: ITransaction[];
-  phase: TPhase;
+  phase: string;
 }
 
 type TActionAllState = ITransactionState & {
@@ -153,7 +143,7 @@ export const userTransactionsActions = {
     type: actionTypes.SET_USER_TRANSACTION,
     payload: {userTransaction},
   }),
-  setPhase: (phase: TPhase): IAction<Partial<TActionAllState>> => ({
+  setPhase: (phase: string): IAction<Partial<TActionAllState>> => ({
     type: actionTypes.SET_PHASE,
     payload: {phase},
   }),
@@ -200,7 +190,9 @@ export function* saga() {
         type: userTransactionInfo.type,
         category_id: userTransactionInfo.category_id,
         user_id: user.id,
-        created_at: userTransactionInfo.created_at,
+        transaction_date: moment(userTransactionInfo.transaction_date).format(
+          'YYYY-MM-DD HH:mm:ss',
+        ),
       });
 
       if (response.status !== 200 || response === undefined) {
@@ -220,14 +212,17 @@ export function* saga() {
     function* updateAccountCodeSaga({
       payload,
     }: IAction<Partial<TActionAllState>>) {
-      yield put(userTransactionsActions.setPhase('updating'));
+      yield put(userTransactionsActions.setPhase('loading'));
 
       const {userTransactionInfo} = payload;
-      const response = yield axios.patch(
+      const response = yield axios.post(
         `${BASE_URL}/update-expense/${userTransactionInfo.id}`,
         {
           title: userTransactionInfo.title,
           amount: userTransactionInfo.amount.toString(),
+          transaction_date: moment(userTransactionInfo.transaction_date).format(
+            'YYYY-MM-DD HH:mm:ss',
+          ),
         },
       );
 
@@ -239,7 +234,7 @@ export function* saga() {
       const {expense} = response.data;
 
       yield put(userTransactionsActions.setUserTransaction(expense));
-      yield put(userTransactionsActions.setPhase('success'));
+      yield put(userTransactionsActions.setPhase('updating-success'));
     },
   );
 
@@ -248,17 +243,17 @@ export function* saga() {
     function* deleteAccountCodeSaga({
       payload,
     }: IAction<Partial<TActionAllState>>) {
-      yield put(userTransactionsActions.setPhase('loading'));
+      yield put(userTransactionsActions.setPhase('delete-loading'));
 
       const {id} = payload;
       const response = yield axios.post(`${BASE_URL}/delete-expense/${id}`);
 
       if (response.status !== 200) {
-        yield put(userTransactionsActions.setPhase('error'));
+        yield put(userTransactionsActions.setPhase('delete-error'));
         return;
       }
       yield put(userTransactionsActions.removeUserTransaction(id));
-      yield put(userTransactionsActions.setPhase('deleted-success'));
+      yield put(userTransactionsActions.setPhase('delete-success'));
     },
   );
 }
