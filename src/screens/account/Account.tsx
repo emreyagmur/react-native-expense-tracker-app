@@ -1,9 +1,16 @@
 import React from 'react';
-import {User, ChevronRight, LogOut, Banknote} from 'lucide-react-native';
+import {ChevronRight, LogOut, Banknote} from 'lucide-react-native';
 import {TouchableOpacity, View} from 'react-native';
-import {ActivityIndicator, Card, Text, useTheme} from 'react-native-paper';
+import {
+  ActivityIndicator,
+  Button,
+  Card,
+  Text,
+  useTheme,
+} from 'react-native-paper';
 import {RootState} from 'src/store/store';
 import {
+  IUser,
   authActions,
   authPhaseSelector,
   authUserSelector,
@@ -26,6 +33,7 @@ type TAccountProps = PropsFromRedux;
 
 export type StackParamList = {
   Currency: undefined;
+  EditAccount: {user: IUser};
 };
 
 type NavigationProps = StackNavigationProp<StackParamList>;
@@ -53,34 +61,45 @@ const Account: React.FC<TAccountProps> = props => {
         flex: 1,
         paddingTop: insets.top,
       }}>
-      <View style={{padding: 10, backgroundColor: theme.colors.background}}>
-        <Card>
-          <Card.Content>
-            <View
-              style={{
-                alignItems: 'center',
-                padding: 10,
-              }}>
-              <UserAvatar user={user} size={80} />
-            </View>
-            <View
+      <TouchableOpacity
+        onPress={() => navigation.navigate('EditAccount', {user: user})}>
+        <View style={{padding: 10, backgroundColor: theme.colors.background}}>
+          <Card mode="outlined">
+            <Card.Content
               style={{
                 display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'center',
-                padding: 10,
+                flexDirection: 'row',
+                justifyContent: 'space-between',
               }}>
-              <Text variant="bodyMedium">{user?.name}</Text>
-              <Text variant="bodySmall">{user?.email}</Text>
-            </View>
-          </Card.Content>
-        </Card>
-      </View>
+              <View
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
+                <UserAvatar user={user} size={35} />
+                <View>
+                  <Text variant="bodyMedium">{user?.name}</Text>
+                  <Text variant="bodySmall">{user?.email}</Text>
+                </View>
+              </View>
+              <View
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
+                <ChevronRight size={18} color={theme.colors.onSurfaceVariant} />
+              </View>
+            </Card.Content>
+          </Card>
+        </View>
+      </TouchableOpacity>
 
       <TouchableOpacity onPress={() => navigation.navigate('Currency')}>
         <View style={{padding: 10, backgroundColor: theme.colors.background}}>
-          <Card>
+          <Card mode="outlined">
             <Card.Content
               style={{
                 display: 'flex',

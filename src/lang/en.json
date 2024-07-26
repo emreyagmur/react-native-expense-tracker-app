@@ -10,6 +10,7 @@
   "delete": "Delete",
   "dont_have_an_account": "Don't have an account?",
   "email": "E-mail",
+  "email_already_exist": "E-mail already exist",
   "have_an_account": "Have an account?",
   "loading": "Loading...",
   "login": "Sign in",
@@ -21,5 +22,6 @@
   "please_wait": "Please wait...",
   "register": "Sign up",
   "save": "Save",
+  "signout": "Sign out",
   "title": "Title"
 }

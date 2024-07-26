@@ -136,7 +136,7 @@ const Home = (props: THomeProps) => {
         </Text>
       </View>
       <View style={{padding: 10, backgroundColor: theme.colors.background}}>
-        <Card>
+        <Card mode="outlined">
           <Card.Content>
             <View
               style={{

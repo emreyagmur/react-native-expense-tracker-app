@@ -17,6 +17,7 @@ import i18n from './lang/_i18n';
 import TransactionInfo from './screens/transaction/TransactionInfo';
 import {currencyActions} from './store/currency';
 import Currency from './screens/account/Currency';
+import EditAccount from './screens/account/EditAccount';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -184,6 +185,26 @@ const Main = () => {
             <Stack.Screen
               name="Currency"
               component={Currency}
+              options={({navigation}) => ({
+                headerTitle: i18n.t('currency'),
+                headerTitleStyle: {
+                  color: theme.colors.onSurfaceVariant,
+                },
+                headerLeft: () => (
+                  <IconButton
+                    onPress={() => navigation.goBack()}
+                    icon={() => <ChevronLeft color="#0A84FF" size={25} />}
+                  />
+                ),
+                headerStyle: {
+                  backgroundColor: theme.colors.background,
+                },
+                headerShadowVisible: false,
+              })}
+            />
+            <Stack.Screen
+              name="EditAccount"
+              component={EditAccount}
               options={({navigation}) => ({
                 headerTitle: i18n.t('currency'),
                 headerTitleStyle: {

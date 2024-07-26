@@ -10,6 +10,7 @@
   "delete": "Sil",
   "dont_have_an_account": "Hesabınız yok mu?",
   "email": "E-posta",
+  "email_already_exist": "E-posta kullanılıyor",
   "have_an_account": "Hesabın var mı?",
   "loading": "Yükleniyor...",
   "login": "Giriş Yap",
@@ -21,5 +22,6 @@
   "please_wait": "Lütfen bekleyin...",
   "register": "Hesap Oluştur",
   "save": "Kaydet",
+  "signout": "Çıkış Yap",
   "title": "İşlem Başlığı"
 }

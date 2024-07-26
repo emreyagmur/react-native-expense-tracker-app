@@ -219,9 +219,14 @@ export const authActions = {
     type: actionTypes.UPDATE_USER_PASSWORD,
     payload: {user, newPassowrd},
   }),
-  register: (name: string, email: string, password: string) => ({
+  register: (
+    name: string,
+    email: string,
+    password: string,
+    userLocale: IUserLocale,
+  ) => ({
     type: actionTypes.SET_REGISTER,
-    payload: {name, email, password},
+    payload: {name, email, password, userLocale},
   }),
   logout: () => ({
     type: actionTypes.AUTH_LOGOUT,
@@ -280,24 +285,19 @@ export function* saga() {
     function* registerSaga({payload}: IAction<Partial<TActionAllState>>) {
       yield put(authActions.setPhase('loading', null));
 
-      const {name, email, password} = payload;
+      const {name, email, password, userLocale} = payload;
       const response = yield axios.post(`${BASE_URL}/register`, {
         name,
         email,
         password,
+        country_id: userLocale.countryCode,
       });
 
       if (response === undefined) {
         yield put(authActions.setPhase('error', 'api_error'));
         return;
-      } else if (response.data.name) {
-        yield put(authActions.setPhase('error', response.data.name));
-        return;
-      } else if (response.data.email) {
-        yield put(authActions.setPhase('error', response.data.email));
-        return;
-      } else if (response.data.password) {
-        yield put(authActions.setPhase('error', response.data.password));
+      } else if (response.data.error) {
+        yield put(authActions.setPhase('error', response.data.error));
         return;
       }
 

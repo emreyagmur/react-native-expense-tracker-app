@@ -61,7 +61,6 @@ const Login = () => {
         return false;
       }
 
-      console.log(loginError);
       dispatch(authActions.login(emailText, passwordText));
     } else {
       if (emailText == '') {
